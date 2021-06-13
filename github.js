@@ -1,4 +1,5 @@
 function initButton(id, buttonTitle, callbackFunc) {
+  console.log("init button called")
   let button = document.createElement("button");
   button.id = id;
   button.textContent = buttonTitle;
@@ -16,29 +17,26 @@ function applyDoorayInfo(responseText) {
   let content = response.result.content;
   document.querySelector(
     "input[id=pull_request_title]"
-  ).value = `#tc-클라우드프레임워크개발팀/${content.number}: ${content.subject}`;
+  ).value = `#클라우드DB개발팀/${content.number}: ${content.subject}`;
   document.querySelector(
     "textarea[id=pull_request_body]"
-  ).value = `* https://nhnent.dooray.com/popup/project/posts/${
-    content.id
-  }`;        
+  ).value = `* https://nhnent.dooray.com/popup/project/posts/${content.id}`;
 }
 
 function fillTitle() {
   let postNumberText = document.getElementsByClassName(
-    "js-select-button css-truncate css-truncate-target"
-  )[3].textContent;
+    "css-truncate css-truncate-target"
+  )[7].textContent;
   let postNumber = postNumberText.split("/")[1].split("-")[0];
 
   chrome.runtime.sendMessage(
     {
-      contentScriptQuery: 'fetchUrl',
-      url: `https://nhnent.dooray.com/v2/wapi/projects/!1963480696738741170/posts/${postNumber}`
+      contentScriptQuery: "fetchUrl",
+      url: `https://nhnent.dooray.com/v2/wapi/projects/!2559193520715588701/posts/${postNumber}`,
     },
-    response => applyDoorayInfo(response)
+    (response) => applyDoorayInfo(response)
   );
 
-    
   console.log("end send");
 }
 
@@ -54,13 +52,13 @@ function appendButton(target) {
 
   target.insertBefore(
     copyButton,
-    document.getElementsByClassName("compare-pr-placeholder")[0]
+    document.getElementsByClassName("new-pr-form Details-content--hidden")[0]
   );
 }
 
 function checkAndAppendButton() {
   let targets = document.getElementsByClassName(
-    "js-details-container Details compare-pr js-compare-pr open"
+    "js-details-container Details js-compare-pr open Details--on"
   );
   for (let i = 0; i < targets.length; i++) {
     appendButton(targets[i]);
