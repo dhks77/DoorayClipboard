@@ -235,11 +235,11 @@ function copyToClipboard(text, elementId) {
 }
 
 
-function initButton(id, buttonTitle, copyText, elementId) {
+function initButton(id, className, buttonTitle, copyText, elementId) {
   let button = document.createElement('button')
   button.id = id
   button.textContent = buttonTitle
-  button.className = 'link-btn d-toolbar-white-icon-btn url-button ng-isolate-scope'
+  button.className = className
   button.addEventListener(
     'click',
     function() {
@@ -260,60 +260,46 @@ function initButton(id, buttonTitle, copyText, elementId) {
   return button
 }
 
-function appendButton(target) {
+function checkAndAppendButton() {
   let buttonIds = ['QFD1boxRNX0', 'QFD1boxRNX1', 'QFD1boxRNX2', 'QFD1boxRNX3']
+  let navigation = document.querySelector('[role="navigation"]')
+  let detailButton = document.evaluate('//span[text()="상세"]', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
 
-  var titleElement = target.querySelector('span.subject.ng-binding');
-  if( titleElement === null) {
-	  return
+  if(!navigation || !detailButton) {
+      return;
   }
-    
-  let title = titleElement.textContent
-  let projectName = target.querySelector('span[ng-bind=\\:\\:\\$ctrl\\.post\\.projectCode]').textContent
-  let postNumber = target.querySelector('span[ng-bind=\\:\\:\\$ctrl\\.post\\.number]').textContent
-  
-  let previousNumberButton = target.querySelector('button[id=' + buttonIds[0] + ']')
+
+  let data = navigation.parentNode.parentNode.previousSibling
+  let buttonClass = detailButton.parentElement.getAttribute('class');
+  let projectName = data.getAttribute('data-project-code')
+  let postNumber = data.getAttribute('data-task-number')
+  let title = data.getAttribute('data-subject')
+
+  let previousNumberButton = document.querySelector('button[id=' + buttonIds[0] + ']')
   if (previousNumberButton && previousNumberButton.textContent === postNumber) {
     return
   }
 
-  let buttonBar = target.querySelector('div.header-right-toolbar.pull-right.layout-align-start-center.layout-row')
   if (previousNumberButton) {
     for (let i = 0; i < buttonIds.length; i++) {
-      let button = target.querySelector('button[id=' + buttonIds[i] + ']')
-      buttonBar.removeChild(button)
+      let button = document.querySelector('button[id=' + buttonIds[i] + ']')
+        navigation.removeChild(button)
     }
   }
 
-  let headerLinkLine = target.querySelector('div.header-link-line.layout-align-start-center.layout-row')
-  let link = buttonBar.childNodes[1].getAttribute('data-clipboard-text')
-  
-  var numberButton = initButton(buttonIds[0], postNumber, postNumber)
-  var commitButton = initButton(buttonIds[1], '커밋메시지', postNumber + ' ' + title)
-  var pullRequestButton = initButton(buttonIds[2], 'Pull메시지', '#' + projectName + '/' + postNumber + ': ' + title)
-
+  let link = 'https://nhnent.dooray.com/project/tasks/' + data.getAttribute('data-task-id')
   let onelineText = postNumber + '/' + title
-
-  var aTag = document.createElement('a');
+  let aTag = document.createElement('a');
   aTag.setAttribute('id', 'clipboard');
   aTag.value = onelineText
   aTag.innerHTML = onelineText.link(link)
+  aTag.style.fontSize = '0'
 
-  headerLinkLine.appendChild(aTag);
-  
-  var messageWithLinkButton = initButton(buttonIds[3], '메시지+링크', onelineText, aTag.getAttribute('id'))
-  
-  buttonBar.appendChild(numberButton)
-  buttonBar.appendChild(commitButton)
-  buttonBar.appendChild(pullRequestButton)
-  buttonBar.appendChild(messageWithLinkButton)
-}
-
-function checkAndAppendButton() {
-  let targets = document.getElementsByClassName('task-view ng-scope layout-column')
-  for (let i = 0; i < targets.length; i++) {
-    appendButton(targets[i])
-  }
+  navigation.appendChild(aTag);
+  navigation.appendChild(initButton(buttonIds[0], buttonClass, postNumber, postNumber))
+  navigation.appendChild(initButton(buttonIds[1], buttonClass, '커밋메시지', postNumber + ' ' + title))
+  navigation.appendChild(initButton(buttonIds[2], buttonClass, 'Pull메시지', '#' + projectName + '/' + postNumber + ': ' + title))
+  navigation.appendChild(initButton(buttonIds[3], buttonClass, '메시지+링크', onelineText, aTag.id))
 }
 
 setInterval(() => {
