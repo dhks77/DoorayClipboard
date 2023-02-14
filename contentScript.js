@@ -296,6 +296,18 @@ function checkAndAppendButton() {
   const buttonIdPrefixes = ['QFD1boxRNX0', 'QFD1boxRNX1', 'QFD1boxRNX2', 'QFD1boxRNX3']
 
   const contentDataDivs = document.querySelectorAll('[data-subject]')
+  const taskIds = [] 
+  contentDataDivs.forEach(contentDataDiv => taskIds.push(contentDataDiv.getAttribute('data-task-id')))
+  
+  const createdButtonContainers = document.querySelectorAll(`[id^="${buttonContainerIdPrefix}"]`);
+
+  createdButtonContainers.forEach(createdButtonContainer => {
+    if (taskIds.includes(createdButtonContainer.dataset.taskId)) {
+      return;
+    }
+    createdButtonContainer.parentElement.removeChild(createdButtonContainer);
+  })
+
   contentDataDivs.forEach(contentDataDiv => {  
 
     if (!contentDataDiv) {
@@ -318,7 +330,7 @@ function checkAndAppendButton() {
 
     const createdButtonContainer = document.querySelector(`#${buttonContainerId}`);
     if (createdButtonContainer) {
-      if (createdButtonContainer.dataset.currentTaskId === taskId) {
+      if (createdButtonContainer.dataset.taskId === taskId) {
         return;
       } else {
         contentContainer.removeChild(createdButtonContainer);
@@ -331,9 +343,9 @@ function checkAndAppendButton() {
     }
 
     const buttonContainer = document.createElement('div');
-    buttonContainer.style.padding = '5px 32px 0 0';
+    buttonContainer.style.padding = '10px 32px 0 0';
     buttonContainer.id = buttonContainerId;
-    buttonContainer.dataset.currentTaskId = taskId;
+    buttonContainer.dataset.taskId = taskId;
 
     buttonContainer.appendChild(initButton(buttonIds[0], postNumber, postNumber));
     buttonContainer.appendChild(initButton(buttonIds[1], '커밋메시지', postNumber + ' ' + title));
