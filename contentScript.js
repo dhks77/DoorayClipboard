@@ -279,7 +279,7 @@ function initButton(id, buttonTitle, copyText, elementId) {
         closeOnClick: true,
         displayCloseButton: true,
         positionClass: 'nfc-top-right',
-        showDuration: 3000,
+        showDuration: 1000,
         theme: 'info'
       })({
         title: '클립보드 COPY',
