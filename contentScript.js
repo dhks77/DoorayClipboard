@@ -235,11 +235,42 @@ function copyToClipboard(text, elementId) {
 }
 
 
-function initButton(id, className, buttonTitle, copyText, elementId) {
+function initButton(id, buttonTitle, copyText, elementId) {
+  const buttonStyleId = 'QFD1boxRNX0-button-style-id';
+  const buttonStyleString = `
+    #${buttonStyleId} {
+      display: inline-flex;
+      -webkit-box-align: center;
+      align-items: center;
+      -webkit-box-pack: center;
+      justify-content: center;
+      background: rgb(255, 255, 255);
+      border: 1px solid rgb(209, 209, 209);
+      box-sizing: border-box;
+      border-radius: 2px;
+      font-size: 14px;
+      line-height: 20px;
+      text-align: left;
+      color: rgb(34, 34, 34);
+      fill: rgb(34, 34, 34);
+      padding: 0px 10px;
+      height: 28px;
+      min-width: 55px;
+      float: right;
+      margin-left: 3px;
+    }
+  `;
+  let buttonStyle = document.querySelector(`#${buttonStyleId}`);
+  if (!buttonStyle) {
+    buttonStyle = document.createElement('style');
+    buttonStyle.innerHTML = buttonStyleString;
+    document.head.appendChild(buttonStyle)
+  }
+
   let button = document.createElement('button')
   button.id = id
   button.textContent = buttonTitle
-  button.className = className
+  button.id = buttonStyleId
   button.addEventListener(
     'click',
     function() {
@@ -261,47 +292,68 @@ function initButton(id, className, buttonTitle, copyText, elementId) {
 }
 
 function checkAndAppendButton() {
-  let buttonIds = ['QFD1boxRNX0', 'QFD1boxRNX1', 'QFD1boxRNX2', 'QFD1boxRNX3']
-  let navigation = document.querySelector('[role="navigation"]')
-  let detailButton = document.evaluate('//span[text()="상세"]', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+  const buttonContainerIdPrefix = 'QFD1boxRNX0-button-container'
+  const buttonIdPrefixes = ['QFD1boxRNX0', 'QFD1boxRNX1', 'QFD1boxRNX2', 'QFD1boxRNX3']
 
-  if(!navigation || !detailButton) {
+  const contentDataDivs = document.querySelectorAll('[data-subject]')
+  contentDataDivs.forEach(contentDataDiv => {  
+
+    if (!contentDataDiv) {
       return;
-  }
-
-  let data = navigation.parentNode.parentNode.previousSibling
-  let buttonClass = detailButton.parentElement.getAttribute('class');
-  let projectName = data.getAttribute('data-project-code')
-  let postNumber = data.getAttribute('data-task-number')
-  let title = data.getAttribute('data-subject')
-
-  let previousNumberButton = document.querySelector('button[id=' + buttonIds[0] + ']')
-  if (previousNumberButton && previousNumberButton.textContent === postNumber) {
-    return
-  }
-
-  if (previousNumberButton) {
-    for (let i = 0; i < buttonIds.length; i++) {
-      let button = document.querySelector('button[id=' + buttonIds[i] + ']')
-        navigation.removeChild(button)
     }
-  }
 
-  let link = 'https://nhnent.dooray.com/project/tasks/' + data.getAttribute('data-task-id')
-  let onelineText = postNumber + '/' + title
-  let aTag = document.createElement('a');
-  aTag.setAttribute('id', 'clipboard');
-  aTag.value = onelineText
-  aTag.innerHTML = onelineText.link(link)
-  aTag.style.fontSize = '0'
+    const contentContainer = contentDataDiv.parentElement
 
-  navigation.appendChild(aTag);
-  navigation.appendChild(initButton(buttonIds[0], buttonClass, postNumber, postNumber))
-  navigation.appendChild(initButton(buttonIds[1], buttonClass, '커밋메시지', postNumber + ' ' + title))
-  navigation.appendChild(initButton(buttonIds[2], buttonClass, 'Pull메시지', '#' + projectName + '/' + postNumber + ': ' + title))
-  navigation.appendChild(initButton(buttonIds[3], buttonClass, '메시지+링크', onelineText, aTag.id))
+    if (!contentContainer) {
+      return;
+    }
+
+    const taskId = contentDataDiv.getAttribute('data-task-id');
+    const projectName = contentDataDiv.getAttribute('data-project-code');
+    const postNumber = contentDataDiv.getAttribute('data-task-number');
+    const title = contentDataDiv.getAttribute('data-subject');
+
+    const buttonContainerId = `${buttonContainerIdPrefix}-${taskId}`;
+    const buttonIds = buttonIdPrefixes.map(buttonIdPrefix => `${buttonIdPrefix}-${taskId}`);
+
+    const createdButtonContainer = document.querySelector(`#${buttonContainerId}`);
+    if (createdButtonContainer) {
+      if (createdButtonContainer.dataset.currentTaskId === taskId) {
+        return;
+      } else {
+        contentContainer.removeChild(createdButtonContainer);
+      }
+    }
+
+    const contentTitle = contentDataDiv.nextSibling;
+    if (!contentTitle) {
+      return;
+    }
+
+    const buttonContainer = document.createElement('div');
+    buttonContainer.style.padding = '5px 32px 0 0';
+    buttonContainer.id = buttonContainerId;
+    buttonContainer.dataset.currentTaskId = taskId;
+
+    buttonContainer.appendChild(initButton(buttonIds[0], postNumber, postNumber));
+    buttonContainer.appendChild(initButton(buttonIds[1], '커밋메시지', postNumber + ' ' + title));
+    buttonContainer.appendChild(initButton(buttonIds[2], 'Pull메시지', '#' + projectName + '/' + postNumber + ': ' + title));
+    
+    let link = 'https://nhnent.dooray.com/project/tasks/' + taskId
+    let onelineText = postNumber + '/' + title
+    let aTag = document.createElement('a');
+    aTag.setAttribute('id', 'clipboard');
+    aTag.value = onelineText
+    aTag.innerHTML = onelineText.link(link)
+    aTag.style.fontSize = '0'
+    buttonContainer.appendChild(aTag);
+    buttonContainer.appendChild(initButton(buttonIds[3], '메시지+링크', onelineText, aTag.id))
+
+    contentContainer.insertBefore(buttonContainer, contentTitle);
+  })
 }
 
 setInterval(() => {
   checkAndAppendButton()
 }, 1000)
+
