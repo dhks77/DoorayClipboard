@@ -20,7 +20,7 @@ function applyDoorayInfo(responseText) {
   ).value = `#클라우드DB개발팀/${content.number}: ${content.subject}`;
   document.querySelector(
     "textarea[id=pull_request_body]"
-  ).value = `* https://nhnent.dooray.com/popup/project/posts/${content.id}`;
+  ).value = `* https://nhnent.dooray.com/task/view/tasks/${content.id}`;
 }
 
 function fillTitle() {
