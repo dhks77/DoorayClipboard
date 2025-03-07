@@ -31,7 +31,7 @@ function fillTitle() {
   chrome.runtime.sendMessage(
     {
       contentScriptQuery: "fetchUrl",
-      url: `https://nhnent.dooray.com/v2/wapi/projects/!2559193520715588701/posts/${postNumber}`,
+      url: `https://nhnent.dooray.com/v2/wapi/projects/!3939952010186161882/posts/${postNumber}`,
     },
     (response) => applyDoorayInfo(response)
   );
