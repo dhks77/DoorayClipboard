@@ -4,7 +4,7 @@
   "version": "1.0.4",
   "description": "Dooray에서 제목을 clipboad에 copy를 쉽게 해주자",
   "permissions": ["activeTab"],
-  "manifest_version": 2,
+  "manifest_version": 3,
   "content_scripts": [
     {
       "matches": ["https://nhnent.dooray.com/*"],
@@ -28,7 +28,6 @@
     }
   ],
   "background": {
-    "scripts": ["background.js"],
-    "persistent": false
+    "service_worker": "background.js"
   }
 }
